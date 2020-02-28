@@ -2,7 +2,7 @@
 
 namespace NetCoreConfiguration.Services
 {
-    public class IdServiceSnap
+    public class IdServiceScope
     {
         private readonly Guid _id = Guid.NewGuid();
 

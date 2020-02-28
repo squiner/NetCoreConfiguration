@@ -50,4 +50,11 @@ namespace NetCoreConfiguration.Settings
         public string TestE { get; set; }
     }
 
+    public class SettingsF
+    {
+        public Guid Guid { get; set; }
+
+        public string TestF { get; set; }
+    }
+
 }

@@ -26,14 +26,17 @@ namespace NetCoreConfiguration
             //1. Standard - register concrete type for whole appsettings file. Pass concrete type in via DI (see HomeController)
             services.AddSingleton(Configuration.Get<AppSettings>());
 
+
             //2. Configure using IOptions<T> - NB IOptions<T> will be registered with a Singleton lifecycle
             // Concrete type SettingsA will then be available via DI (see TestAController)
             services.Configure<SettingsA>(Configuration.GetSection("SettingsA"));
+
 
             //3. Configure using IOptionsSnapshot<T> - NB IOptionsSnapshot<T> will be registered with a Scoped lifecycle
             //When using IOptionsSnapshot, changes to the underlying Configuration object are reflected
             //Concrete type SettingsB will then be available via DI (see TestBController)
             services.Configure<SettingsB>(Configuration.GetSection("SettingsB"));
+
 
             //4. Register using an Implementation Factory - Forward the registration of a service type onto an existing registration
             //Use an overload of TryAddSingleton which takes an Implementation Factory - this is a Func with a single
@@ -42,6 +45,7 @@ namespace NetCoreConfiguration
             //IOptions<T> or IOptionsSnapshot<T>
             services.Configure<SettingsC>(Configuration.GetSection("SettingsC"));
             services.TryAddSingleton<ISettingsC>(sp => sp.GetRequiredService<IOptions<SettingsC>>().Value);
+
 
             //5. If you want to configure some settings by loading values from some Service e.g. a Service that access the DB.
             //You cannot access services registered in ConfigureServices from inside ConfigureServices. Instead, create a class derived
@@ -52,6 +56,7 @@ namespace NetCoreConfiguration
             services.AddSingleton<IdService>();
             services.AddSingleton<IConfigureOptions<SettingsD>, ConfigureSettingsDOptions>();
 
+
             //6. As mentioned, the previous example will only work for Singleton services. For scoped services, we have 2 options.
             //One option is to user IOptionsSnapshot<T> and register the IConfigureOptions as Scoped
             services.Configure<SettingsE>(Configuration.GetSection("SettingsE"));
@@ -59,6 +64,15 @@ namespace NetCoreConfiguration
             services.AddScoped<IConfigureOptions<SettingsE>, ConfigureSettingsEOptions>();
             //However, as we're now using a Scoped lifecycle, the Guid value in the IdServiceSnap will be different after 
             //each request. This may or may not cause issues depending on what you're using the Guid for
+
+
+            //7. A better option might be to use the root IServiceProvider to manually create a new scope and resolve the required
+            //service using that. Inject the ServiceProvider into the ctor of your IConfigureOptions class, create a new scope and resolve
+            //the required service. It also allows you to register your IConfigurationOptions as a Singleton to ensure the same Guid is 
+            //used on each request
+            services.Configure<SettingsF>(Configuration.GetSection("SettingsF"));
+            services.AddScoped<IdServiceScope>();
+            services.AddSingleton<IConfigureOptions<SettingsF>, ConfigureSettingsFOptions>();
 
 
             services.AddControllersWithViews();
