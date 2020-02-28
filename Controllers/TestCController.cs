@@ -5,7 +5,7 @@ namespace NetCoreConfiguration.Controllers
 {
     public class TestCController : Controller
     {
-        private ISettingsC _settingsC;
+        private readonly ISettingsC _settingsC;
 
         public TestCController(ISettingsC settingsC)
         {

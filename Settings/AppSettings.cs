@@ -1,4 +1,6 @@
-﻿namespace NetCoreConfiguration.Settings
+﻿using System;
+
+namespace NetCoreConfiguration.Settings
 {
     public class AppSettings
     {
@@ -32,6 +34,20 @@
         public string TestB { get; set; }
         public string TestC { get; set; }
 
+    }
+
+    public class SettingsD
+    {
+        public Guid Guid { get; set; }
+
+        public string TestD { get; set; }
+    }
+
+    public class SettingsE
+    {
+        public Guid Guid { get; set; }
+
+        public string TestE { get; set; }
     }
 
 }

@@ -4,18 +4,18 @@ using NetCoreConfiguration.Settings;
 
 namespace NetCoreConfiguration.Controllers
 {
-    public class TestAController : Controller
+    public class TestDController : Controller
     {
-        private readonly SettingsA _settingsA;
+        private readonly SettingsD _settings;
 
-        public TestAController(IOptions<SettingsA> options)
+        public TestDController(IOptions<SettingsD> options)
         {
-            _settingsA = options.Value;
+            _settings = options.Value;
         }
 
         public IActionResult Index()
         {
-            ViewData["Title"] = _settingsA.TestA;
+            ViewData["Id"] = _settings.Guid;
             return View();
         }
     }

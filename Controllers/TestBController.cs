@@ -6,7 +6,7 @@ namespace NetCoreConfiguration.Controllers
 {
     public class TestBController : Controller
     {
-        private SettingsB _settingsB;
+        private readonly SettingsB _settingsB;
 
         public TestBController(IOptionsSnapshot<SettingsB> options)
         {
