@@ -57,4 +57,16 @@ namespace NetCoreConfiguration.Settings
         public string TestF { get; set; }
     }
 
+    public class SettingsG
+    {
+       public string TestG { get; set; }
+    }
+
+    public class SettingsH
+    {
+        public string TestH { get; set; }
+        public string TestH1 { get; set; }
+        public string TestH2 { get; set; }
+    }
+
 }

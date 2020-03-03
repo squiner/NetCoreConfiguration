@@ -23,7 +23,7 @@ namespace NetCoreConfiguration
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //1. Standard - register concrete type for whole appsettings file. Pass concrete type in via DI (see HomeController)
+            //1. Standard - register concrete type for whole appSettings file. Pass concrete type in via DI (see HomeController)
             services.AddSingleton(Configuration.Get<AppSettings>());
 
 
@@ -38,7 +38,13 @@ namespace NetCoreConfiguration
             services.Configure<SettingsB>(Configuration.GetSection("SettingsB"));
 
 
-            //4. Register using an Implementation Factory - Forward the registration of a service type onto an existing registration
+            //4. Configure using IOptionsMonitor<T> - NB IOptionsMonitor<T> will be registered with a Singleton lifecycle
+            //When using IOptionsMonitor, an OnChange event is raised when the underlying config file is changed
+            //Concrete type SettingsG will then be available via DI (see TestGController)
+            services.Configure<SettingsG>(Configuration.GetSection("SettingsG"));
+
+
+            //5. Register using an Implementation Factory - Forward the registration of a service type onto an existing registration
             //Use an overload of TryAddSingleton which takes an Implementation Factory - this is a Func with a single
             //parameter of the IServiceProvider. The delegate will be invoked once the IServiceProvider is built so we have access to
             //previously registered services. This allows us to directly inject the interface using DI rather than an instance of
@@ -47,7 +53,7 @@ namespace NetCoreConfiguration
             services.TryAddSingleton<ISettingsC>(sp => sp.GetRequiredService<IOptions<SettingsC>>().Value);
 
 
-            //5. If you want to configure some settings by loading values from some Service e.g. a Service that access the DB.
+            //6. If you want to configure some settings by loading values from some Service e.g. a Service that access the DB.
             //You cannot access services registered in ConfigureServices from inside ConfigureServices. Instead, create a class derived
             //from IConfigureOptions (ConfigureSettingsDOptions) and inject the required service into it using DI
             //Then register the IConfigureOptions as a Singleton -> NB this example uses IOptions<T> so only works for
@@ -57,7 +63,7 @@ namespace NetCoreConfiguration
             services.AddSingleton<IConfigureOptions<SettingsD>, ConfigureSettingsDOptions>();
 
 
-            //6. As mentioned, the previous example will only work for Singleton services. For scoped services, we have 2 options.
+            //7. As mentioned, the previous example will only work for Singleton services. For scoped services, we have 2 options.
             //One option is to user IOptionsSnapshot<T> and register the IConfigureOptions as Scoped
             services.Configure<SettingsE>(Configuration.GetSection("SettingsE"));
             services.AddScoped<IdServiceSnap>();
@@ -66,13 +72,39 @@ namespace NetCoreConfiguration
             //each request. This may or may not cause issues depending on what you're using the Guid for
 
 
-            //7. A better option might be to use the root IServiceProvider to manually create a new scope and resolve the required
+            //8. A better option might be to use the root IServiceProvider to manually create a new scope and resolve the required
             //service using that. Inject the ServiceProvider into the ctor of your IConfigureOptions class, create a new scope and resolve
             //the required service. It also allows you to register your IConfigurationOptions as a Singleton to ensure the same Guid is 
             //used on each request
             services.Configure<SettingsF>(Configuration.GetSection("SettingsF"));
             services.AddScoped<IdServiceScope>();
             services.AddSingleton<IConfigureOptions<SettingsF>, ConfigureSettingsFOptions>();
+
+
+            //9. Setting validation using AddOptions - NB validation will only fire on first use (TestHController).
+            //Eager validation is being considered in future versions of .NET Core - fail fast on Startup rather than
+            //on first use/access
+            services.AddOptions<SettingsH>()
+                .Bind(Configuration.GetSection("SettingsH"))
+                .Validate(v =>
+                {
+                    if (string.IsNullOrEmpty(v.TestH))
+                    {
+                        return false;
+                    }
+
+                    if (string.IsNullOrEmpty(v.TestH1))
+                    {
+                        return false;
+                    }
+
+                    if (string.IsNullOrEmpty(v.TestH2))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }, "Some settings are missing");
 
 
             services.AddControllersWithViews();
